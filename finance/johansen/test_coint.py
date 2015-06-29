@@ -8,10 +8,10 @@ Author: Josef Perktold
 import os
 import numpy as np
 from numpy.testing import assert_almost_equal, assert_equal
-from statsmodels.tsa.johansen import coint_johansen
+from johansen import coint_johansen
 
 current_path = os.path.dirname(os.path.abspath(__file__))
-dta = np.genfromtxt(open(current_path + "/results/test_coint.csv", "rb"))
+dta = np.genfromtxt(open(current_path + "/test_coint.csv", "rb"))
 
 
 class CheckCointJoh(object):
