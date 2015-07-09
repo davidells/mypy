@@ -1,8 +1,32 @@
+import os
 import pandas as pd
 import mean_reversion as mr
+
 from nose.tools import assert_almost_equals
 
+def setup_module():
+    global EWA, EWC
+    path = os.path.dirname(os.path.abspath(__file__))
+    EWA = pd.read_csv(path + "/EWA.csv")['Adj Close']
+    EWC = pd.read_csv(path + "/EWC.csv")['Adj Close']
+
 def halflife_test():
-    y = pd.Series([1,2,3,2,1,2,3,2,1,2,3,2,1])
-    hl = mr.halflife(y)
-    assert_almost_equals(hl, 0.693, places=3)
+    assert_almost_equals(
+        mr.halflife(EWA), 127.63, places=2)
+
+def cadf_ols_test():
+    result = mr.cadf(EWA, EWC, method="ols")
+    assert_almost_equals(result[0], -3.6375, places=4)
+    assert_almost_equals(result[1],  0.0051, places=4)
+    
+def cadf_tls_test():
+    result = mr.cadf(EWA, EWC, method="tls")
+    assert_almost_equals(result[0], -3.6667, places=4)
+    assert_almost_equals(result[1],  0.0046, places=4)
+    
+def vratiotest_test():
+    result = mr.vratiotest(EWA, (4,16))
+    assert_almost_equals(result.values[0][0], 61.4775, places=4)
+    assert_almost_equals(result.values[0][1], 36.6405, places=4)
+    assert_almost_equals(result.values[1][0], 127.7714, places=4)
+    assert_almost_equals(result.values[1][1], 76.8186, places=4)

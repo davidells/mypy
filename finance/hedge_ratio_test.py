@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 import pandas.io.data as web
 import scipy.odr as odr
@@ -10,8 +11,9 @@ from nose.tools import assert_almost_equals, raises
 
 def setup_module():
     global EWA, EWC
-    EWA = pd.read_csv("EWA.csv")['Adj Close']
-    EWC = pd.read_csv("EWC.csv")['Adj Close']
+    path = os.path.dirname(os.path.abspath(__file__))
+    EWA = pd.read_csv(path + "/EWA.csv")['Adj Close']
+    EWC = pd.read_csv(path + "/EWC.csv")['Adj Close']
     
 def test_hedge_ratio_ols():
     model = LinearRegression().fit(EWA[:,None], EWC)
@@ -34,8 +36,3 @@ def test_hedge_ratio_tls():
 @raises(ValueError)
 def test_hedge_ratio_bad_arg():
     hedge_ratio(EWA, EWC, method="unknown")
-    
-if __name__=='__main__':
-    setup_module()
-    test_hedge_ratio_ols()
-    test_hedge_ratio_tls()
