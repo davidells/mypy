@@ -30,3 +30,9 @@ def vratiotest_test():
     assert_almost_equals(result.values[0][1], 36.6405, places=4)
     assert_almost_equals(result.values[1][0], 127.7714, places=4)
     assert_almost_equals(result.values[1][1], 76.8186, places=4)
+    
+def hurst_exponent_test():
+    path = os.path.dirname(os.path.abspath(__file__))
+    bwn = pd.read_csv(path + "/brown72.h", header=None)[[0]]
+    result = mr.hurst_exponent(bwn)
+    assert_almost_equals(result, 0.724765, places=6)

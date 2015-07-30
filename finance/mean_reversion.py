@@ -59,3 +59,28 @@ def vratiotest(y, kvec):
     mq.index = ["k=" + str(k) for k in kvec]
     mq.columns = ["M1", "M2"]
     return mq
+
+# __rescaled_range adapted from HurstK in FGN package in R
+def __rescaled_range(series):
+    y = series - series.mean()
+    s = y.cumsum()
+    r = (s.max() - s.min()) / np.sqrt(pow(y,2).sum() / len(y))
+    return r
+
+# Implemented based on method discussed at
+# http://www.bearcave.com/misl/misl_tech/wavelets/hurst/index.html
+def hurst_exponent(series):
+    length = len(series)
+    upper_bound = int(np.floor(np.log2(length)))
+    divisions = range(upper_bound)
+    
+    hurst_vals = np.zeros((len(divisions), 2))
+    for i in divisions:
+        n = int(np.floor(length / pow(2,i)))
+        range_series = pd.rolling_apply(series, n, __rescaled_range)
+        range_mean = range_series[-1::-n].mean()
+        hurst_vals[i,:] = [np.log2(n), np.log2(range_mean)]
+        
+    hurst_lm = lm.LinearRegression()
+    hurst_lm.fit(hurst_vals[:,0,None], hurst_vals[:,1])
+    return hurst_lm.coef_
