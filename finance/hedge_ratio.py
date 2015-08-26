@@ -7,7 +7,7 @@ def hedge_ratio(x, y, method="ols"):
     
     if method == "ols":
         model = LinearRegression().fit(x[:,None], y)
-        return model.coef_
+        return model.coef_[0]
 
     elif method == "tls":
         return odr.ODR(

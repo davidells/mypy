@@ -18,7 +18,7 @@ def setup_module():
 def test_hedge_ratio_ols():
     model = LinearRegression().fit(EWA[:,None], EWC)
     assert_almost_equals(
-        model.coef_, 
+        model.coef_[0], 
         hedge_ratio(EWA, EWC, method="ols"),
         places=10)
     
