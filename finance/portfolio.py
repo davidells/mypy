@@ -5,7 +5,7 @@ def portfolio_prices(prices, weights):
     return (prices * weights).sum(axis=1)
 
 def portfolio_returns(prices, weights, units):
-    positions = units * weights * prices
+    positions = prices * weights * units
     pnl = (positions.shift(1) * prices.pct_change()).sum(axis=1)
     grossMktVal = positions.abs().sum(axis=1)
     ret = (pnl / grossMktVal.shift(1)).fillna(value=0)
