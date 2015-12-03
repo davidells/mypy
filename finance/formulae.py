@@ -11,14 +11,34 @@ def annual_sharpe(returns, risk_free_rate=0, periods=252):
 def cumret(returns):
     return (1 + returns).cumprod() - 1
 
+def totalret(returns):
+    return cumret(returns).iloc[-1]
+
 def drawdown(returns):
     equity = cumret(returns)
     emax = pd.expanding_max(equity)
-    return (equity - emax) * -1
+    return equity - emax
 
 def time_in_drawdown(returns):
     equity = cumret(returns)
     emax = pd.expanding_max(equity)
     block = (emax.shift(1) != emax).astype(int).cumsum()
-    block_by_values = block.groupby(by=block.__getitem__)
-    return block_by_values.transform(lambda x: range(1, len(x) + 1)) - 1
+    blocks_by_value = block.groupby(by=block.__getitem__)
+    replace_block_with_range = lambda x: range(1, len(x) + 1)
+    return blocks_by_value.transform(replace_block_with_range) - 1
+
+def report(name, returns):
+    return """%s
+        Total return: %.3f
+        Sharpe ratio: %.2f
+        APR: %.3f
+        Drawdown: %.2f
+        Max Time in Drawdown: %d
+    """ % (
+        name,
+        totalret(returns),
+        annual_sharpe(returns),
+        apr(returns),
+        drawdown(returns).min(),
+        time_in_drawdown(returns).max()
+    )

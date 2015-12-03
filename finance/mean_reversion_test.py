@@ -2,7 +2,8 @@ import os
 import pandas as pd
 import mean_reversion as mr
 
-from nose.tools import assert_almost_equals
+from nose.tools import assert_almost_equals, assert_equals
+from numpy.testing import assert_array_equal
 
 def setup_module():
     global EWA, EWC
@@ -36,3 +37,12 @@ def hurst_exponent_test():
     bwn = pd.read_csv(path + "/brown72.h", header=None)[[0]]
     result = mr.hurst_exponent(bwn)
     assert_almost_equals(result, 0.724765, places=6)
+    
+def bollinger_band_units_test():
+    example = pd.Series([-0.5, -1.0, -1.1, -0.5, 0, 1.0, 1.1, 0.5, 0])
+    
+    units = mr.bollinger_band_units(example, entryZScore=1, exitZScore=0)
+    assert_array_equal(units.values, [0, 0, 1, 1, 0, 0, -1, -1, 0]) 
+    
+    units2 = mr.bollinger_band_units(example, entryZScore=0.5, exitZScore=0)
+    assert_array_equal(units2.values, [0, 1, 1, 1, 0, -1, -1, -1, 0]) 
