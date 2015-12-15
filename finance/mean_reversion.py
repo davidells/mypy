@@ -50,7 +50,7 @@ def __LM_stat(y, k):
     
     return (m1, m2)
 
-def vratiotest(y, kvec):
+def vratiotest(y, kvec=[2, 4, 8, 16, 32]):
     n = len(y)
     mq = np.zeros((len(kvec), 2))
     for i in range(len(kvec)):
@@ -84,24 +84,3 @@ def hurst_exponent(series):
     hurst_lm = lm.LinearRegression()
     hurst_lm.fit(hurst_vals[:,0,None], hurst_vals[:,1])
     return hurst_lm.coef_
-
-def bollinger_band_units(zScore, entryZScore=1, exitZScore=0):
-    longsEntry = zScore < -entryZScore
-    longsExit = zScore >= exitZScore
-    shortsEntry = zScore > entryZScore
-    shortsExit = zScore <= exitZScore
-    
-    unitsLong = pd.Series(data=np.nan, index=zScore.index)
-    unitsShort = pd.Series(data=np.nan, index=zScore.index)
-    
-    unitsLong[0] = 0
-    unitsLong[longsEntry] = 1
-    unitsLong[longsExit] = 0
-    unitsLong = unitsLong.fillna(method='ffill')
-    
-    unitsShort[0] = 0
-    unitsShort[shortsEntry] = -1
-    unitsShort[shortsExit] = 0
-    unitsShort = unitsShort.fillna(method='ffill')
-    
-    return unitsLong + unitsShort

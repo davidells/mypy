@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-def portfolio_prices(prices, weights):
+def portfolio_price(prices, weights):
     return (prices * weights).sum(axis=1)
 
 def portfolio_returns(prices, weights, units):
@@ -9,7 +9,12 @@ def portfolio_returns(prices, weights, units):
     pnl = (positions.shift(1) * prices.pct_change()).sum(axis=1)
     grossMktVal = positions.abs().sum(axis=1)
     ret = (pnl / grossMktVal.shift(1)).fillna(value=0)
-    return (ret, positions, pnl, grossMktVal)
+    return {
+        'returns': ret,
+        'positions': positions,
+        'pnl': pnl,
+        'grossMktVal': grossMktVal
+    }
 
 def portfolio_shares(prices, weights, units, marketValue):
     returns = portfolio_returns(prices, weights, units)

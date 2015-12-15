@@ -1,6 +1,10 @@
+import numpy as np
+import pandas as pd
 import scipy.odr as odr
 
 from sklearn.linear_model import LinearRegression
+
+import util
 
 # Concepts adapted from http://quanttrader.info/public/betterHedgeRatios.pdf
 def hedge_ratio(x, y, method="ols"):
@@ -18,14 +22,7 @@ def hedge_ratio(x, y, method="ols"):
         raise ValueError("method must equal 'ols' (ordinary least squares) "
                          " or 'tls' (total least squares)")
 
-# TODO: 
-# 
-# hedgeRatios <- function(x, y, lookback = 20, ...) {
-#   df <- as.xts(data.frame(x, y))
-#   rollapply(df,
-#     width = lookback, 
-#     by.column = FALSE,
-#     FUN = function (window) { 
-#       hedgeRatio(window[,1], window[,2], ...) 
-#   })
-# }
+def rolling_hedge_ratio(x, y, lookback):
+    df = pd.DataFrame({'x': x, 'y': y})
+    return util.rolling_apply(df, lookback, 
+        lambda win: hedge_ratio(win['x'], win['y']))
