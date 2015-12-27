@@ -11,7 +11,7 @@ def halflife(y):
     yDelta = y.diff()[2:]
     model = lm.LinearRegression()
     model = model.fit(y[2:,np.newaxis], yDelta)
-    return np.log(2) / model.coef_
+    return (np.log(2) / model.coef_)[0]
 
 def cadf(x, y, method="ols", maxlag=1, regression="c"):
     beta = hr.hedge_ratio(x, y, method=method)

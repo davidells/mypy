@@ -45,7 +45,7 @@ def report_str(returns, name):
         Max Time in Drawdown: %d
     """ % (
         name,
-        totalret(returns),
+        total_return(returns),
         annual_sharpe(returns),
         apr(returns),
         drawdown(returns).min(),

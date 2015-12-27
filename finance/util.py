@@ -33,6 +33,8 @@ def rolling_apply(df, lookback, fn):
 def rolling_z_score(series, lookback=21):
     return (series - pd.rolling_mean(series, lookback)) / pd.rolling_std(series, lookback)
 
-
-
+def update_with_prefix(dict1, dict2, prefix, keys=None):
+    keys = keys or dict2.keys()
+    for k in keys:
+        dict1[prefix + k] = dict2[k]
 

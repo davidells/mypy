@@ -18,7 +18,7 @@ def portfolio_returns(prices, weights, units):
 
 def portfolio_shares(prices, weights, units, marketValue):
     returns = portfolio_returns(prices, weights, units)
-    grossMktVal = returns[3]
+    grossMktVal = returns['grossMktVal']
     gmvFrame = pd.DataFrame([grossMktVal] * prices.shape[1]).transpose()
     gmvFrame.columns = prices.columns
     gmvFrame.index = prices.index
