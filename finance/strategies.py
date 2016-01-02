@@ -76,7 +76,7 @@ def bollinger_mean_revert_fit(x, y, model=None, index=None):
             'hedge_lookback': hedge_lookback,
             'entry_z_score': entry_z_score,
             'exit_z_score': exit_z_score
-        })
+        }, index=index)
         return (results['prices'], results['weights'], results['units'])
     
     #strategy = rolling_hedge_mean_revert_strategy
@@ -98,7 +98,7 @@ def bollinger_mean_revert_fit(x, y, model=None, index=None):
     
     # default for lookback is to optimize
     lookback = lookback or optimize.vs_sharpe(
-            'lookback', [5, 10, 15, 20, 25, 30], 
+            'lookback', [10, 15, 20, 25, 50],
             lambda lb: strategy(x, y, lb, hedge_lookback, entry_z_score, exit_z_score),
             index=index,
             debug=debug)
@@ -106,7 +106,7 @@ def bollinger_mean_revert_fit(x, y, model=None, index=None):
     # default for hedge lookback is to optimize
     if hedge_lookback is None:
         hedge_lookback = optimize.vs_sharpe(
-                'hedge_lookback', [5, 10, 15, 20, 50, 200],
+                'hedge_lookback', [10, 15, 20, 25, 50],
                 lambda hlb: strategy(x, y, lookback, hlb, entry_z_score, exit_z_score),
                 index=index,
                 debug=debug)
@@ -131,7 +131,7 @@ def bollinger_mean_revert_fit(x, y, model=None, index=None):
                 debug=debug)
         
         
-    fit = {}
+    fit = { 'type': 'bollinger_mean_revert' }
     fit.update(model)
     fit.update({
         'lookback': lookback,
@@ -143,7 +143,7 @@ def bollinger_mean_revert_fit(x, y, model=None, index=None):
 
 def bollinger_mean_revert(x, y, model=None, index=None):
     if model is None:
-        model = bollinger_mean_revert_fit(x, y)
+        model = bollinger_mean_revert_fit(x, y, index=index)
         
     if index is None:
         index = x.index
@@ -157,24 +157,27 @@ def bollinger_mean_revert(x, y, model=None, index=None):
     # Setup mean reversion portfolio to use for tradable zScore
     strategy = rolling_hedge_mean_revert_strategy
     (prices, weights, units) = strategy(x, y, lookback, hedge_lookback)
-    port = portfolio.portfolio_price(prices, weights)[index]
+    
+    prices = prices.loc[index]
+    weights = weights.loc[index]
+    units = units[index]
+    
+    port = portfolio.portfolio_price(prices, weights)
     
     # Ok, now let's look at the half-life of this portfolio, this needs to be low (under 30)
     # TODO: Test this? Throw it out if it doesn't meet standard?
     halflife = mr.halflife(port)
-    cadf = sms.adfuller(port)[0]
+    cadf = sms.adfuller(port, maxlag=1, regression='c')[0]
     hurst = mr.hurst_exponent(port.pct_change().fillna(0))[0]
     
     # Collect zScore and theoretical results in the form of a sharpe ratio
     zScore = util.rolling_z_score(port, lookback)
     rets = portfolio.portfolio_returns(prices, weights, -zScore)['returns']
-    rets = rets[index]
     theoretical_sharpe = returns.annual_sharpe(rets)
     
     # Collect units of this portfolio according to bollinger band strategy (buying and selling
     # against the given zScore)    
     units = bollinger_band_units(zScore, entryZScore=entry_z_score, exitZScore=exit_z_score)
-    units = units[index]
     
     # Random experiment - static weights. Basically, force hedge weights to be static for the duration
     # of any particular trade.

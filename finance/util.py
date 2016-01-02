@@ -38,3 +38,8 @@ def update_with_prefix(dict1, dict2, prefix, keys=None):
     for k in keys:
         dict1[prefix + k] = dict2[k]
 
+def pad_left(s, amount, char=' '):
+    return char * (amount - len(s)) + s
+
+def pad_right(s, amount, char=' '):
+    return s + char * (amount - len(s))
