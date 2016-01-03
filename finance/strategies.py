@@ -76,7 +76,7 @@ def bollinger_mean_revert_fit(x, y, model=None, index=None):
             'hedge_lookback': hedge_lookback,
             'entry_z_score': entry_z_score,
             'exit_z_score': exit_z_score
-        }, index=index)
+        })
         return (results['prices'], results['weights'], results['units'])
     
     #strategy = rolling_hedge_mean_revert_strategy
@@ -141,13 +141,10 @@ def bollinger_mean_revert_fit(x, y, model=None, index=None):
     })
     return fit
 
-def bollinger_mean_revert(x, y, model=None, index=None):
+def bollinger_mean_revert(x, y, model=None):
     if model is None:
-        model = bollinger_mean_revert_fit(x, y, index=index)
+        model = bollinger_mean_revert_fit(x, y)
         
-    if index is None:
-        index = x.index
-
     lookback = model['lookback']
     hedge_lookback = model['hedge_lookback']
     entry_z_score = model['entry_z_score']
@@ -157,11 +154,6 @@ def bollinger_mean_revert(x, y, model=None, index=None):
     # Setup mean reversion portfolio to use for tradable zScore
     strategy = rolling_hedge_mean_revert_strategy
     (prices, weights, units) = strategy(x, y, lookback, hedge_lookback)
-    
-    prices = prices.loc[index]
-    weights = weights.loc[index]
-    units = units[index]
-    
     port = portfolio.portfolio_price(prices, weights)
     
     # Ok, now let's look at the half-life of this portfolio, this needs to be low (under 30)
@@ -203,10 +195,6 @@ def bollinger_mean_revert(x, y, model=None, index=None):
     }
         
     port_rets = portfolio.portfolio_returns(prices, weights, units)
-    port_rets['returns'] = port_rets['returns'][index]
-    port_rets['pnl'] = port_rets['pnl'][index]
-    port_rets['grossMktVal'] = port_rets['grossMktVal'][index]
-        
     results.update(port_rets)
     
     rets = port_rets['returns']
